@@ -42,8 +42,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.repository }}:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.repository }}:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -60,7 +60,7 @@ jobs:
 
       - name: Deploy Helm chart
         env:
-          IMAGE_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.repository }}
+          IMAGE_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat
           IMAGE_TAG: ${{ github.sha }}
         run: |
           helm upgrade --install nodegoat ./helm \
