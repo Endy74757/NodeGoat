@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.database.mongo.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: {{ .Values.database.mongo.name }}
+spec:
+  serviceName: "mongo"
+  replicas: {{ .Values.database.mongo.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.database.mongo.name }}
+  podManagementPolicy: "OrderedReady"
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.database.mongo.name }}
+    spec:
+      containers:
+        - name: {{ .Values.database.mongo.name }}
+          image: {{ .Values.database.mongo.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.database.mongo.port }}
+              name: mongodb
+          env:
+{{ toYaml .Values.database.mongo.env | indent 12 }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.database.mongo.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.database.mongo.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          volumeMounts:
+            - name: mongo-data
+              mountPath: /data/db
+  volumeClaimTemplates:
+    - metadata:
+        name: mongo-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.database.mongo.storage }}
+        # Optional: set storageClassName to your cluster's StorageClass
+        # storageClassName: "standard"

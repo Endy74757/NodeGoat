@@ -1,0 +1,12 @@
+# NodeGoat Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodegoat-test-service
+  namespace: nodegoat1
+spec:
+  selector: { app: nodegoat }
+  ports:
+    - port: 4000
+      targetPort: 4000
+  type: ClusterIP

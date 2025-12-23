@@ -1,0 +1,153 @@
+namespace: nodegoat
+app: nodegoat
+livenessProbe:
+  enabled: true
+readinessProbe:
+  enabled: true
+
+# Database (Mongo) settings
+database:
+  mongo:
+    replicas: 1
+    name: mongo
+    port: 27017
+    image: mongo:4.4
+    env:
+      - name: MONGO_INITDB_DATABASE
+        value: "nodegoat"
+    volumeMounts:
+      - name: mongo-data
+        mountPath: /data/db
+    storage: 5Gi
+
+# Webapp configuration
+webapp:
+  nodegoat:
+    replicas: 2
+    name: nodegoat
+    port: 4000
+    image:
+      repository: nodegoat
+      tag: local
+      pullPolicy: IfNotPresent
+    env:
+      - name: NODE_ENV
+        value: "development"
+    envFromConfigMap: true
+    envFromSecret:
+      - name: COOKIE_SECRET
+        valueFrom:
+          secretKeyRef:
+            name: nodegoat-secret
+            key: cookieSecret
+    resources:
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+
+# Services
+services:
+  mongo:
+    name: mongo
+    type: ClusterIP
+    port: 27017
+  nodegoat:
+    name: nodegoat
+    # For Kind you can keep ClusterIP and map host 80->80 on the cluster node,
+    # or change this to NodePort if you prefer.
+    type: ClusterIP
+    port: 4000
+
+# ConfigMap values
+configmap:
+  name: nodegoat-config
+  data:
+    PORT: "4000"
+    MONGODB_URI: "mongodb://mongo:27017/nodegoat"
+
+# Ingress configuration (enabled by default for Kind testing)
+ingress:
+  enabled: true
+
+  className: "nginx"
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    # Use staging to avoid Let's Encrypt rate limits during tests
+    # cert-manager.io/cluster-issuer: "letsencrypt-staging"
+    # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  host: nodegoat.local
+  paths:
+    - path: /
+      pathType: Prefix
+      backend:
+        service:
+          name: nodegoat
+          port:
+            number: 4000
+  # tls:
+  #   - hosts:
+  #       - nodegoat.local
+  #     secretName: nodegoat-tls
+
+# Kind-specific notes and helper values
+kind:
+  # Example kind cluster extraPortMappings you can use when creating the cluster
+  # (save to a file like kind-config.yaml and use `kind create cluster --config kind-config.yaml`):
+  # extraPortMappings:
+  #   - containerPort: 80
+  #     hostPort: 80
+  #     protocol: TCP
+  #   - containerPort: 443
+  #     hostPort: 443
+  #     protocol: TCP
+  hostsFileEntry: "127.0.0.1 nodegoat.local"
+
+# Job to initialize DB
+job:
+  enabled: true
+  image:
+    repository: nodegoat
+    tag: local
+  command: ["node","artifacts/db-reset.js"]
+  backoffLimit: 4
+
+# PVC settings
+pvc:
+  storageClassName: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 2Gi
+
+# Resource defaults
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+# Autoscaling (optional)
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80
+
+mongodb:
+  enabled: true
+  host: mongo
+  port: 27017
+  user: ""
+  password: ""
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+
+extraVars: {}
+

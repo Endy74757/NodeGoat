@@ -1,0 +1,12 @@
+# NodeGoat Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.services.nodegoat.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  selector: { app: {{ .Values.app }} }
+  ports:
+    - port: {{ .Values.services.nodegoat.port }}
+      targetPort: {{ .Values.webapp.nodegoat.port }}
+  type: {{ .Values.services.nodegoat.type }}

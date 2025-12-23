@@ -1,0 +1,9 @@
+# ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nodegoat-config
+  namespace: nodegoat1
+data:
+  PORT: "4000"
+  MONGODB_URI: "mongodb://mongo:27017/nodegoat"

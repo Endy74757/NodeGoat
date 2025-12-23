@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.webapp.nodegoat.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.webapp.nodegoat.replicas }}
+  selector: { matchLabels: { app: {{ .Values.app }} } }
+  template:
+    metadata: { labels: { app: {{ .Values.app }} } }
+    spec:
+      containers:
+        - name: {{ .Values.webapp.nodegoat.name }}
+          image: {{ printf "%s:%s" .Values.webapp.nodegoat.image.repository .Values.webapp.nodegoat.image.tag }}
+          imagePullPolicy: {{ .Values.webapp.nodegoat.image.pullPolicy }}
+          command: [ "npm", "start" ]
+          ports: [{ containerPort: {{ .Values.webapp.nodegoat.port }} }]
+          envFrom:
+            - configMapRef: { name: {{ .Values.configmap.name }} }
+          env:
+{{- if .Values.webapp.nodegoat.env }}
+{{ toYaml .Values.webapp.nodegoat.env | indent 12 }}
+{{- end }}
+{{- if .Values.webapp.nodegoat.envFromSecret }}
+{{ toYaml .Values.webapp.nodegoat.envFromSecret | indent 12 }}
+{{- end }}
+          livenessProbe:
+            httpGet: { path: "/", port: {{ .Values.webapp.nodegoat.port }} }
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          readinessProbe:
+            httpGet: { path: "/", port: {{ .Values.webapp.nodegoat.port }} }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: {{ .Values.webapp.nodegoat.resources.requests.memory }}
+              cpu: {{ .Values.webapp.nodegoat.resources.requests.cpu }}
+            limits:
+              memory: {{ .Values.webapp.nodegoat.resources.limits.memory }}
+              cpu: {{ .Values.webapp.nodegoat.resources.limits.cpu }}

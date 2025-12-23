@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nodegoat-ingress
+  namespace: nodegoat1
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+    - host: nodegoat.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nodegoat
+                port:
+                  number: 4000
+  # หากต้องการ TLS ให้ใส่ส่วนนี้และสร้าง secret (เช่น โดย cert-manager)
+  # tls:
+  #  - hosts: ["nodegoat.local"]
+  #    secretName: nodegoat-tls
