@@ -14,4 +14,3 @@ jobs:
           echo "Runner started"
           whoami
           hostname
-        shell: powershell
