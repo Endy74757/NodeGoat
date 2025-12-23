@@ -16,7 +16,7 @@ permissions:
 jobs:
   deploy:
     runs-on: self-hosted
-    environment: dev
+    # environment: dev
 
     steps:
       - name: Checkout repository
