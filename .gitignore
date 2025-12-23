@@ -29,3 +29,5 @@ test/e2e/videos/
 
 # ignore Snyk Code scanner files
 .dccache
+
+.github\workflows\lint.yml
