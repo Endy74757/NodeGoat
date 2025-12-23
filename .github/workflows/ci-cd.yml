@@ -16,7 +16,7 @@ permissions:
 jobs:
   deploy:
     runs-on: self-hosted
-    environment: dev
+    # environment: dev
 
     steps:
       - name: Checkout repository
@@ -30,17 +30,17 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: endy95
+          password: dckr_pat_eqGmAXmR3LLFGJM7xKVoBIBdn_Q
 
       # Build & Push Image
       - name: Build and push Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest .
-          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest `
-                     ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
+          docker build -t endy95/nodegoat:latest .
+          docker tag endy95/nodegoat:latest `
+                     endy95/nodegoat:${{ github.sha }}
+          docker push endy95/nodegoat:latest
+          docker push endy95/nodegoat:${{ github.sha }}
         shell: powershell
 
       # ตรวจสอบ Kubernetes (Docker Desktop)
@@ -59,7 +59,7 @@ jobs:
         run: |
           helm upgrade --install nodegoat ./helm `
             --namespace nodegoat --create-namespace `
-            --set webapp.nodegoat.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/nodegoat `
+            --set webapp.nodegoat.image.repository=endy95/nodegoat `
             --set webapp.nodegoat.image.tag=${{ github.sha }} `
             --wait --timeout 5m
         shell: powershell
