@@ -36,7 +36,7 @@ jobs:
   build:
     # needs: checkout
     runs-on: arc-scale-set
-    
+    environment: Dev
     container:
       image: docker:latest
       options: --privileged
