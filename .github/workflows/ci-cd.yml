@@ -82,15 +82,6 @@ jobs:
           echo "IMAGE_REPO=${{ secrets.DOCKERHUB_USERNAME }}/nodegoat" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
 
-      - name: Archive repository
-        run: |
-          tar --warning=no-file-changed -czf repo.tgz .
-
-      - name: Upload repository artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: repo
-          path: repo.tgz
     outputs:
       image_repo: ${{ steps.setvars.outputs.IMAGE_REPO }}
       image_tag: ${{ steps.setvars.outputs.IMAGE_TAG }}
@@ -99,14 +90,8 @@ jobs:
     needs: build
     runs-on: arc-scale-set
     steps:
-      - name: Download repository artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: repo
-
-      - name: Extract repository
-        run: |
-          tar -xzf repo.tgz
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
