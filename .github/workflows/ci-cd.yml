@@ -38,7 +38,7 @@ jobs:
     runs-on: arc-scale-set
     
     container:
-      image: docker:24-dind
+      image: docker:latest
       options: --privileged
 
 
