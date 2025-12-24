@@ -35,7 +35,7 @@ jobs:
 
   build:
     # needs: checkout
-    runs-on: [self-hosted, arc-scale-set]
+    runs-on: arc-scale-set
     container:
       image: docker:24.0
       options: --privileged
