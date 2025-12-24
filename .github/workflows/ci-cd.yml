@@ -37,11 +37,6 @@ jobs:
     # needs: checkout
     runs-on: arc-scale-set
     environment: Dev
-    container:
-      image: docker:latest
-      options: --privileged
-
-
     steps:
       # - name: Download repository artifact
       #   uses: actions/download-artifact@v4
@@ -112,7 +107,7 @@ jobs:
       - name: Extract repository
         run: |
           tar -xzf repo.tgz
-          
+
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
         with:
