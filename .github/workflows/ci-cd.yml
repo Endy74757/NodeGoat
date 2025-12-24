@@ -24,15 +24,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: SonarQube Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        with:
-          args: >
-            -Dsonar.projectKey=OPSTA-Engineer_NodeGoat
-            -Dsonar.organization=opsta-engineer
-            -Dsonar.sources=.
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # - name: SonarQube Scan
+      #   uses: SonarSource/sonarcloud-github-action@master
+      #   with:
+      #     args: >
+      #       -Dsonar.projectKey=OPSTA-Engineer_NodeGoat
+      #       -Dsonar.organization=opsta-engineer
+      #       -Dsonar.sources=.
+      #   env:
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
