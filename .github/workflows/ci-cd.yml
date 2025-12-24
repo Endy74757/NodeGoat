@@ -112,7 +112,7 @@ jobs:
       #     echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
       #     chmod 600 $HOME/.kube/config
 
-      - name: Deploy Helm chart
+      - name: Deploy Helm chart1
         env:
           IMAGE_REPO: ${{ vars.DOCKERHUB_USERNAME }}/nodegoat
           IMAGE_TAG: ${{ github.sha }}
