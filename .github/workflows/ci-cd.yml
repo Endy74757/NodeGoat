@@ -38,7 +38,7 @@ jobs:
     runs-on: arc-scale-set
     environment: Dev
     container:
-      image: docker:24.0.5-cli
+      image: docker:latest
       options: --privileged  # needed for Docker-in-Docker
     steps:
       # - name: Download repository artifact
