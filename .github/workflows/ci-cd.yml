@@ -21,7 +21,7 @@ jobs:
     environment: Dev
 
     steps:
-      - name: Checkout repository1
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: SonarQube Scan
