@@ -86,43 +86,53 @@ jobs:
         run: |
           echo "IMAGE_REPO=${{ secrets.DOCKERHUB_USERNAME }}/nodegoat" >> $GITHUB_OUTPUT
           echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: Archive repository
+        run: |
+          tar -czf repo.tgz .
+
+      - name: Upload repository artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo
+          path: repo.tgz
     outputs:
       image_repo: ${{ steps.setvars.outputs.IMAGE_REPO }}
       image_tag: ${{ steps.setvars.outputs.IMAGE_TAG }}
 
-  # deploy:
-  #   needs: build
-  #   runs-on: [self-hosted, arc-scale-set]
-  #   container:
-  #     image: dtzar/helm-kubectl:3.19.0
-  #   steps:
-  #     # - name: Download repository artifact
-  #     #   uses: actions/download-artifact@v4
-  #     #   with:
-  #     #     name: repo
+  deploy:
+    needs: build
+    runs-on: arc-scale-set
+    container:
+      image: dtzar/helm-kubectl:3.19.0
+    steps:
+      - name: Download repository artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: repo
 
-  #     # - name: Extract repository
-  #     #   run: |
-  #     #     tar -xzf repo.tgz
+      - name: Extract repository
+        run: |
+          tar -xzf repo.tgz
 
-  #     - name: Configure kubeconfig
-  #       env:
-  #         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-  #       run: |
-  #         mkdir -p $HOME/.kube
-  #         echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
-  #         chmod 600 $HOME/.kube/config
+      # - name: Configure kubeconfig
+      #   env:
+      #     KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      #   run: |
+      #     mkdir -p $HOME/.kube
+      #     echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
+      #     chmod 600 $HOME/.kube/config
 
-  #     - name: Deploy Helm chart
-  #       env:
-  #         IMAGE_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat
-  #         IMAGE_TAG: ${{ github.sha }}
-  #       run: |
-  #         helm upgrade --install nodegoat ./helm \
-  #           --namespace nodegoat --create-namespace \
-  #           --set webapp.nodegoat.image.repository=${IMAGE_REPO} \
-  #           --set webapp.nodegoat.image.tag=${IMAGE_TAG} \
-  #           --wait --timeout 5m
+      - name: Deploy Helm chart
+        env:
+          IMAGE_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          helm upgrade --install nodegoat ./helm \
+            --namespace nodegoat --create-namespace \
+            --set webapp.nodegoat.image.repository=${IMAGE_REPO} \
+            --set webapp.nodegoat.image.tag=${IMAGE_TAG} \
+            --wait --timeout 5m
 
 # helm install arc --namespace arc-systems --create-namespace oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
