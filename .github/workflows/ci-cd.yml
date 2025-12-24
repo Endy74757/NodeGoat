@@ -40,8 +40,6 @@ jobs:
     container:
       image: docker:24.0.5-cli
       options: --privileged  # needed for Docker-in-Docker
-      volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       # - name: Download repository artifact
       #   uses: actions/download-artifact@v4
