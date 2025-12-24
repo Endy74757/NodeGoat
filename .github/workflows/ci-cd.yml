@@ -36,9 +36,15 @@ jobs:
   build:
     # needs: checkout
     runs-on: arc-scale-set
-    container:
-      image: docker:24.0
-      options: --privileged
+    
+    services:
+      docker:
+        image: docker:24.0.5-dind
+        options: --privileged
+        ports:
+          - 2375:2375
+        volumes:
+          - /var/lib/docker
 
     steps:
       # - name: Download repository artifact
