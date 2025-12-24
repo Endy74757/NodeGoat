@@ -15,24 +15,42 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
-    # runs-on: ubuntu-latest
-    runs-on: arc-scale-set
-    environment: Dev
+  # checkout:
+  #   runs-on: [self-hosted, arc-scale-set]
+  #   container:
+  #     image: alpine:3.18
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Archive repository
+  #       run: |
+  #         tar -czf repo.tgz .
+
+  #     - name: Upload repository artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: repo
+  #         path: repo.tgz
+
+  build:
+    # needs: checkout
+    runs-on: [self-hosted, arc-scale-set]
+    container:
+      image: docker:24.0
+      options: --privileged
 
     steps:
+      # - name: Download repository artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: repo
+
+      # - name: Extract repository
+      #   run: |
+      #     tar -xzf repo.tgz
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # - name: SonarQube Scan
-      #   uses: SonarSource/sonarcloud-github-action@master
-      #   with:
-      #     args: >
-      #       -Dsonar.projectKey=OPSTA-Engineer_NodeGoat
-      #       -Dsonar.organization=opsta-engineer
-      #       -Dsonar.sources=.
-      #   env:
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -40,7 +58,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Login to GitHub Container Registry
+      - name: Login to container registry
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -58,27 +76,48 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # - name: Configure kubeconfig
-      #   env:
-      #     KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-      #   run: |
-      #     mkdir -p $HOME/.kube
-      #     echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
-      #     chmod 600 $HOME/.kube/config
+      - name: Set image outputs
+        id: setvars
+        run: |
+          echo "IMAGE_REPO=${{ secrets.DOCKERHUB_USERNAME }}/nodegoat" >> $GITHUB_OUTPUT
+          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
+    outputs:
+      image_repo: ${{ steps.setvars.outputs.IMAGE_REPO }}
+      image_tag: ${{ steps.setvars.outputs.IMAGE_TAG }}
 
-      # - name: Install helm
-      #   uses: azure/setup-helm@v3
+  # deploy:
+  #   needs: build
+  #   runs-on: [self-hosted, arc-scale-set]
+  #   container:
+  #     image: dtzar/helm-kubectl:3.19.0
+  #   steps:
+  #     # - name: Download repository artifact
+  #     #   uses: actions/download-artifact@v4
+  #     #   with:
+  #     #     name: repo
 
-      # - name: Deploy Helm chart
-      #   env:
-      #     IMAGE_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat
-      #     IMAGE_TAG: ${{ github.sha }}
-      #   run: |
-      #     helm upgrade --install nodegoat ./helm \
-      #       --namespace nodegoat --create-namespace \
-      #       --set webapp.nodegoat.image.repository=${IMAGE_REPO} \
-      #       --set webapp.nodegoat.image.tag=${IMAGE_TAG} \
-      #       --wait --timeout 5m
+  #     # - name: Extract repository
+  #     #   run: |
+  #     #     tar -xzf repo.tgz
+
+  #     - name: Configure kubeconfig
+  #       env:
+  #         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+  #       run: |
+  #         mkdir -p $HOME/.kube
+  #         echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
+  #         chmod 600 $HOME/.kube/config
+
+  #     - name: Deploy Helm chart
+  #       env:
+  #         IMAGE_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat
+  #         IMAGE_TAG: ${{ github.sha }}
+  #       run: |
+  #         helm upgrade --install nodegoat ./helm \
+  #           --namespace nodegoat --create-namespace \
+  #           --set webapp.nodegoat.image.repository=${IMAGE_REPO} \
+  #           --set webapp.nodegoat.image.tag=${IMAGE_TAG} \
+  #           --wait --timeout 5m
 
 # helm install arc --namespace arc-systems --create-namespace oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
