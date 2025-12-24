@@ -38,17 +38,20 @@ jobs:
     runs-on: arc-scale-set
     env:
       DOCKER_HOST: tcp://localhost:2375
+    container:
+      image: docker:24.0.5-dind
+      options: --privileged --host=tcp://0.0.0.0:2376
 
-    services:
-      docker:
-        image: docker:24.0.5-dind
-        options: --privileged
-        env:
-          DOCKER_TLS_CERTDIR: ""
-        ports:
-          - 2375:2375
-        volumes:
-          - /var/lib/docker
+    # services:
+    #   docker:
+    #     image: docker:24.0.5-dind
+    #     options: --privileged
+    #     env:
+    #       DOCKER_TLS_CERTDIR: ""
+    #     ports:
+    #       - 2375:2375
+    #     volumes:
+    #       - /var/lib/docker
 
     steps:
       # - name: Download repository artifact
