@@ -103,8 +103,6 @@ jobs:
   deploy:
     needs: build
     runs-on: arc-scale-set
-    container:
-      image: dtzar/helm-kubectl:3.19.0
     steps:
       - name: Download repository artifact
         uses: actions/download-artifact@v4
@@ -114,7 +112,17 @@ jobs:
       - name: Extract repository
         run: |
           tar -xzf repo.tgz
+          
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
 
+      # ติดตั้ง helm on-the-fly
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
       # - name: Configure kubeconfig
       #   env:
       #     KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
