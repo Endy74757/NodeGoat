@@ -4,11 +4,11 @@ metadata:
   name: {{ .Values.services.mongo.name }}
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.app }}
+    app: {{ .Values.database.mongo.name }}
 spec:
   type: {{ .Values.services.mongo.type }}
   selector:
-    app: {{ .Values.app }}
+    app: {{ .Values.database.mongo.name }}
   ports:
     - name: mongodb
       port: {{ .Values.services.mongo.port }}

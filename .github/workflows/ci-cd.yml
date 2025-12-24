@@ -16,12 +16,23 @@ permissions:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: arc-runner-set
     environment: Dev
 
     steps:
       - name: Checkout repository1
         uses: actions/checkout@v4
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.projectKey=OPSTA-Engineer_NodeGoat
+            -Dsonar.organization=opsta-engineer
+            -Dsonar.sources=.
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -68,3 +79,9 @@ jobs:
       #       --set webapp.nodegoat.image.repository=${IMAGE_REPO} \
       #       --set webapp.nodegoat.image.tag=${IMAGE_TAG} \
       #       --wait --timeout 5m
+
+# helm install arc --namespace arc-systems --create-namespace oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+
+# helm install arc-scale-set --namespace arc-runners --create-namespace --set githubConfigUrl="https://github.com/Endy74757/NodeGoat.git" --set githubConfigSecret.github_token="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" oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+
+# kubectl create secret generic pre-defined-secret --namespace=arc-runners --from-literal=github_app_id=2529249 --from-literal=github_app_installation_id=100996931 --from-file=github_app_private_key=./arc-runner12.2025-12-23.private-key.pem
