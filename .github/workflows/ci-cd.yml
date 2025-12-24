@@ -114,14 +114,13 @@ jobs:
 
       - name: Deploy Helm chart
         env:
-          IMAGE_REPO: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat
+          IMAGE_REPO: ${{ vars.DOCKERHUB_USERNAME }}/nodegoat
           IMAGE_TAG: ${{ github.sha }}
         run: |
           helm upgrade --install nodegoat ./helm \
             --namespace nodegoat --create-namespace \
             --set webapp.nodegoat.image.repository=${IMAGE_REPO} \
-            --set webapp.nodegoat.image.tag=${IMAGE_TAG} \
-            --wait --timeout 5m
+            --set webapp.nodegoat.image.tag=${IMAGE_TAG} 
 
 # helm install arc --namespace arc-systems --create-namespace oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
 
