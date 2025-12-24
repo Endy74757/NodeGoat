@@ -37,6 +37,11 @@ jobs:
     # needs: checkout
     runs-on: arc-scale-set
     environment: Dev
+    container:
+      image: docker:24.0.5-cli
+      options: --privileged  # needed for Docker-in-Docker
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
     steps:
       # - name: Download repository artifact
       #   uses: actions/download-artifact@v4
@@ -90,6 +95,8 @@ jobs:
     needs: build
     runs-on: arc-scale-set
     environment: Dev
+    container:
+      image: dtzar/helm-kubectl:3.19.0
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
