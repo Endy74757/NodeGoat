@@ -37,9 +37,9 @@ jobs:
     # needs: checkout
     runs-on: arc-scale-set
     environment: Dev
-    # container:
-    #   image: docker:dind
-    #   options: --privileged  # needed for Docker-in-Docker
+    container:
+      image: docker:latest
+      options: --user root -v /var/run/docker.sock:/var/run/docker.sock --privileged  # needed for Docker-in-Docker
     steps:
       # - name: Download repository artifact
       #   uses: actions/download-artifact@v4
