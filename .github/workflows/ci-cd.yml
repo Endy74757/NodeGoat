@@ -38,7 +38,7 @@ jobs:
     runs-on: arc-scale-set
     environment: Dev
     container:
-      image: docker:latest
+      image: docker:cli
       env:
         DOCKER_HOST: unix:///var/run/docker.sock
       # options:
