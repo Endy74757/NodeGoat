@@ -41,10 +41,6 @@ jobs:
       image: docker:cli
       env:
         DOCKER_HOST: unix:///var/run/docker.sock
-      # options:
-      # 1. --user 0:0 -> บังคับรันเป็น root (แก้ปัญหา permission denied)
-      # 2. --privileged -> ให้สิทธิ์เข้าถึง device (แก้ปัญหาเข้าถึง socket ไม่ได้)
-      # 3. -v ... -> mount socket จาก DinD เข้ามาใน container นี้
       options: --user 0:0 --privileged -v /var/run/docker.sock:/var/run/docker.sock
     steps:
       - name: Checkout repository
