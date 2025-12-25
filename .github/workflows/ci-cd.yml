@@ -39,7 +39,9 @@ jobs:
     environment: Dev
     container:
       image: docker:cli
-      options: --user 0:0 --privileged -v /run/user/1001/docker.sock:/var/run/docker.sock
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock # Required for Docker-in-Docker
+      options: --user root
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
