@@ -37,8 +37,8 @@ jobs:
     # needs: checkout
     runs-on: arc-scale-set
     environment: Dev
-    # container:
-    #   image: gcr.io/kaniko-project/executor:debug
+    container:
+      image: docker/buildx-bin:latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
