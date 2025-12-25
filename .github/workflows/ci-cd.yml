@@ -37,19 +37,20 @@ jobs:
     # needs: checkout
     runs-on: arc-scale-set
     environment: Dev
+    container:
+      image: gcr.io/kaniko-project/executor:v1.23.2
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       # 1️⃣ Build image (NO PUSH)
       - name: Build image with Kaniko (no push)
-        uses: aevea/action-kaniko@v0.11.0
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          image: ${{ vars.DOCKERHUB_USERNAME }}/kaniko
-          cache: true
-          cache_registry: ${{ vars.DOCKERHUB_USERNAME }}/cache
+        id: buildimage
+        run: |
+          /kaniko/executor \
+            --context . \
+            --destination=${{ vars.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }} \
+            --cache=true
 
 
       # - name: Build Image using Buildah
