@@ -37,9 +37,9 @@ jobs:
     # needs: checkout
     runs-on: arc-scale-set
     environment: Dev
-    container:
-      image: docker:latest
-      options: --privileged  # needed for Docker-in-Docker
+    # container:
+    #   image: docker:dind
+    #   options: --privileged  # needed for Docker-in-Docker
     steps:
       # - name: Download repository artifact
       #   uses: actions/download-artifact@v4
@@ -54,12 +54,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Wait for Docker daemon
-        run: |
-          for i in $(seq 1 30); do
-            docker version && break || sleep 1
-          done
 
       - name: Login to container registry
         uses: docker/login-action@v2
@@ -94,7 +88,7 @@ jobs:
     runs-on: arc-scale-set
     environment: Dev
     container:
-      image: dtzar/helm-kubectl:3.19.0
+      image: ${{ needs.build.outputs.image_repo }}:${{ needs.build.outputs.image_tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
