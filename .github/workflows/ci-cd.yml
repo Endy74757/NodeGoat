@@ -39,9 +39,7 @@ jobs:
     environment: Dev
     container:
       image: docker:cli
-      env:
-        DOCKER_HOST: unix:///var/run/docker.sock
-      options: --user 0:0 --privileged -v /var/run/docker.sock:/var/run/docker.sock
+      options: --user 0:0 --privileged -v /run/user/1001/docker.sock:/var/run/docker.sock
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
