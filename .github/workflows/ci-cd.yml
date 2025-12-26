@@ -105,10 +105,23 @@ jobs:
       #     mkdir -p $HOME/.kube
       #     echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
       #     chmod 600 $HOME/.kube/config
-      - name: Force in-cluster auth
+
+      - name: Detect runner ServiceAccount & verify permissions
         run: |
-          rm -f ~/.kube/config
-          unset KUBECONFIG
+          echo "Runner pod: $(hostname)"
+          echo "ServiceAccount:"
+          kubectl get pod $(hostname) -o jsonpath='{.spec.serviceAccountName}{"\n"}' || true
+          echo "Current context:"
+          kubectl config view --minify || true
+          kubectl version --short || true
+          echo "Can we create deployments in namespace nodegoat?"
+          kubectl auth can-i create deployments --namespace=nodegoat || true
+          helm version || true
+
+      # - name: Force in-cluster auth
+      #   run: |
+      #     rm -f ~/.kube/config
+      #     unset KUBECONFIG
       - name: Deploy Helm chart
         env:
           IMAGE_REPO: ${{ vars.DOCKERHUB_USERNAME }}/nodegoat
