@@ -79,7 +79,7 @@ jobs:
   #     image_tag: ${{ steps.setvars.outputs.IMAGE_TAG }}
 
   deploy:
-    needs: build
+    # needs: build
     runs-on: arc-scale-set
     environment: Dev
     container:
