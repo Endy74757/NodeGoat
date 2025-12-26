@@ -98,13 +98,13 @@ jobs:
         uses: azure/setup-helm@v3
         with:
           version: 'latest'
-      # - name: Configure kubeconfig
-      #   env:
-      #     KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-      #   run: |
-      #     mkdir -p $HOME/.kube
-      #     echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
-      #     chmod 600 $HOME/.kube/config
+      - name: Configure kubeconfig
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
       - name: Detect runner ServiceAccount & verify permissions
         run: |
@@ -118,10 +118,6 @@ jobs:
           kubectl auth can-i create deployments --namespace=nodegoat || true
           helm version || true
 
-      # - name: Force in-cluster auth
-      #   run: |
-      #     rm -f ~/.kube/config
-      #     unset KUBECONFIG
       - name: Deploy Helm chart
         env:
           IMAGE_REPO: ${{ vars.DOCKERHUB_USERNAME }}/nodegoat
