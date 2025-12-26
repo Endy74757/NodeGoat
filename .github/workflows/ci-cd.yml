@@ -28,10 +28,11 @@ jobs:
         with:
           args: |
             -Dsonar.projectKey=Nodegoat
+            -Dsonar.projectName=Nodegoat
+            -Dsonar.projectVersion=1.0
             -Dsonar.sources=.
             -Dsonar.exclusions=**/node_modules/**,**/test/**,**/helm/**,**/*.yml,**/*.yaml,**/*.md,Dockerfile,,**/k8s/**
-            -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
