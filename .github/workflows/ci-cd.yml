@@ -116,7 +116,7 @@ jobs:
       - name: Deploy Helm chart
         env:
           IMAGE_REPO: ${{ vars.DOCKERHUB_USERNAME }}/nodegoat
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: latest # ${{ github.sha }}
         run: |
           helm upgrade --install nodegoat ./helm \
             --namespace nodegoat --create-namespace \
