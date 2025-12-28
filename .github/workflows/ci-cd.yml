@@ -28,9 +28,10 @@ jobs:
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         with:
-          args: |
+          projectBaseDir: .
+          args: >
             -Dsonar.projectKey=Nodegoat
-            -Dsonar.projectName=Nodegoat
+            "-Dsonar.projectName=Nodegoat"
             -Dsonar.projectVersion=1.0
             -Dsonar.sources=.
             -Dsonar.exclusions=**/node_modules/**,**/test/**,**/helm/**,**/*.yml,**/*.yaml,**/*.md,Dockerfile,,**/k8s/**
@@ -50,7 +51,7 @@ jobs:
       - name: Dependeency Track
         uses: DependencyTrack/gh-upload-sbom@v3
         with:
-          protocol: 'TCP'
+          protocol: 'http'
           serverHostname: 'dependency-track-api-server.dependency-track.svc.cluster.local'
           port: "8080"
           apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
