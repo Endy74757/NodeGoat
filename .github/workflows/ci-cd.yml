@@ -10,7 +10,8 @@ on:
     branches: [ master ]
 
 permissions:
-  contents: read
+  actions: read
+  contents: write
   packages: write
   id-token: write
 
@@ -22,8 +23,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Set up Node.js
+      
+      # รันการสแกน SonarQube
+      - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           args: |
@@ -36,6 +38,26 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # รัน Syft เพื่อสร้าง SBOM
+      - name: Generate SBOM using Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: .                       # scan โฟลเดอร์ปัจจุบัน
+          format: cyclonedx-json            # รูปแบบไฟล์ (spdx-json, cyclonedx-json, syft-json)
+          output-file: nodegoat-code-sbom.json
+
+      - name: Dependeency Track
+        uses: DependencyTrack/gh-upload-sbom@v3
+        with:
+          protocol: 'http'
+          serverHostname: 'dependency-track-api-server.dependency-track.svc.cluster.local'
+          port: "8080"
+          apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
+          projectName: 'Nodegoat-Code'
+          projectVersion: 'master'
+          bomFilename: "nodegoat-code-sbom.json"
+          autoCreate: true
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -52,27 +74,48 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      # Step 1: Build และ Load เข้า Docker Local (ยังไม่ Push)
+      - name: Build Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: ./Dockerfile
-          push: true
+          load: true       # ⚠️ สำคัญ: ดึง Image ออกมาเพื่อให้ Step ถัดไปมองเห็น
+          push: false      # ยังไม่ Push
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Set image outputs
-        id: setvars
-        run: |
-          echo "IMAGE_REPO=${{ secrets.DOCKERHUB_USERNAME }}/nodegoat" >> $GITHUB_OUTPUT
-          echo "IMAGE_TAG=${{ github.sha }}" >> $GITHUB_OUTPUT
+      # --- พื้นที่สำหรับแทรก Step อื่นๆ (เช่น Syft, Trivy, Run Test) ---
+      # ตัวอย่าง: สร้าง SBOM จาก Image ที่เพิ่ง Build
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
+          format: cyclonedx-json 
+          output-file: nodegoat-image-sbom.json
 
-    outputs:
-      image_repo: ${{ steps.setvars.outputs.IMAGE_REPO }}
-      image_tag: ${{ steps.setvars.outputs.IMAGE_TAG }}
+      - name: Dependeency Track
+        uses: DependencyTrack/gh-upload-sbom@v3
+        with:
+          protocol: 'http'
+          serverHostname: 'dependency-track-api-server.dependency-track.svc.cluster.local'
+          port: "8080"
+          apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
+          projectName: 'Nodegoat-Image'
+          projectVersion: 'master'
+          bomFilename: "nodegoat-image-sbom.json"
+          autoCreate: true
+
+      # -----------------------------------------------------------
+
+      # Step 2: Push Image ขึ้น Docker Hub
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
 
   deploy:
     needs: build
