@@ -50,7 +50,7 @@ jobs:
       - name: Dependeency Track
         uses: DependencyTrack/gh-upload-sbom@v3
         with:
-          protocol: 'http'
+          protocol: 'TCP'
           serverHostname: 'dependency-track-api-server.dependency-track.svc.cluster.local'
           port: "8080"
           apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
