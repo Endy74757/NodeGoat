@@ -155,7 +155,7 @@ jobs:
           jq . Nodegoat-Code-Report.json >/dev/null || {
           echo "❌ Invalid JSON report"
           exit 1
-}
+          }
 
       - name: Export Dependency Track Report (Image Analysis Findings)
         env:
