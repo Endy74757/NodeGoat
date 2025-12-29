@@ -26,6 +26,16 @@ helm upgrade --instal \
   -namespace defectdojo --create-namespace
 ```
 
+ถ้าต้องการให้เรียก API ผ่าน Internal service ได้ให้ config value นี้:
+```yaml
+django:
+  # -- Autoscaling configuration for the Django deployment.
+  uwsgi:
+    extraEnv: 
+      - name: DD_ALLOWED_HOSTS
+        value: "defectdojo-django.defectdojo.svc.cluster.local"
+```
+
 สามารถดูค่า helm value ต่างๆหรืออ่านเพิ่มเติมได้[ที่นี้](https://artifacthub.io/packages/helm/defectdojo/defectdojo)
 
 ---

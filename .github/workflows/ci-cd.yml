@@ -147,10 +147,15 @@ jobs:
 
           curl -sS -X GET \
             --header "X-Api-Key: ${DT_API_KEY}" \
-            "${DT_URL}/api/v1/finding/project/${DT_PROJECT_UUID}/export" \
+            "${DT_URL}/api/v1/finding/project/${DT_PROJECT_UUID}" \
             --output Nodegoat-Code-Report.json
 
-            ls -la Nodegoat-Code-Report.json
+          ls -la Nodegoat-Code-Report.json
+          
+          jq . Nodegoat-Code-Report.json >/dev/null || {
+          echo "❌ Invalid JSON report"
+          exit 1
+}
 
       - name: Export Dependency Track Report (Image Analysis Findings)
         env:
