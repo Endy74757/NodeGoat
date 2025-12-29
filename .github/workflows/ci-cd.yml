@@ -8,6 +8,8 @@ name: CI/CD
 on:
   push:
     branches: [ master ]
+    paths:
+      - '.github/workflows/**'
 
 permissions:
   actions: read
@@ -112,6 +114,42 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
+
+  Report:
+    needs: build
+    runs-on: arc-scale-set
+    environment: Dev
+    steps:
+      - name: Export SonarQube Report
+        run: |
+          curl -u \$SONAR_TOKEN: \\
+          "\$SONAR_HOST_URL/api/issues/search?components=\$SONAR_PROJECT_KEY&ps=500" \\
+          -o sonar-report.json
+        env:
+          SONAR_PROJECT_KEY: 'Nodegoat'
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      # Download Dependency Track Report
+      - name: Export Dependency Track Report
+        run: |
+          curl -sS -X GET \\
+          --header "X-Api-Key: \$DT_API_KEY" \\
+          "\$DT_URL/api/v1/finding/project/\$DT_PROJECT_UUID/export" \\
+          --output dt-findings.json
+        env:
+          DT_API_KEY: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
+          DT_PROJECT_UUID: |
+            $(curl -sS -X GET \\
+            --header "X-Api-Key: ${{ secrets.DEPENDENCYTRACK_APIKEY }}" \\
+            "http://dependency-track-api-server.dependency-track.svc.cluster.local:8080/api/v1/project?name=Nodegoat-Code" \\
+            | jq -r '.[0].uuid')
+      
+      # อัพโหลดรายงานเป็น Artifact
+      - name: Upload Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: Quality-Reports
 
   deploy:
     needs: build
