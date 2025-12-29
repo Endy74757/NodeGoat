@@ -47,18 +47,23 @@ echo "DefectDojo admin password: $(kubectl \
       --output jsonpath='{.data.DD_ADMIN_PASSWORD}' \
       | base64 --decode)"
 ```
-- สร้าง Project 
+- สร้าง Product
 ```markdown
-คลิกไปที่ มุมซ้ายบน(☰) → Project → Create Project
-กรอก Project name ให้เรียบร้อย  
-เมื่อทำทุกอย่างครบให้คลิก Create
+คลิกไปที่ มุมซ้ายบน(☰) → Add Product
+กรอก Product name ให้เรียบร้อย  
+เมื่อทำทุกอย่างครบให้คลิก Summit
+```
+- สร้าง Engagements
+```markdown
+คลิกไปที่ Engagements → Add New CI/CD Engagement
+กรอก Engagement name ให้เรียบร้อย  
+เมื่อทำทุกอย่างครบให้คลิก Done
 ```
 
 ## 3. สร้าง API Keys เพื่อนำไปใช้ทำ CI
 ```markdown
-คลิกไปที่ มุมซ้ายบน(☰) → Administration → Access Management → Teams → Automation  
-หา API Keys คลิกที่รูปบวก  
-เพิ่ม PROJECT_CREATION_UPLOAD เพื่อให้สามารถสร้าง Project ผ่าน API Keys ได้โดยคลิกที่รูปบวก แล้วติ๊ก PROJECT_CREATION_UPLOAD   
+คลิกไปที่ มุมขวาบน → API v2 Key
+หา API Keys    
 Copy API Keys เก็บไว้ให้เรียบร้อย
 ```
 ---
@@ -67,7 +72,7 @@ Copy API Keys เก็บไว้ให้เรียบร้อย
 นำ API Keys ที่ได้ไปใส่ใน Secret ใน github
 - ไปที่ setting → Secrets and variables → Action 
 - สร้าง Environment secrets แล้วตั้งว่า Dev
-- คลิก Add environment secrets ตั้งชื่อว่า DEPENDENCYTRACK_APIKEY แล้วใส่ API Keys
+- คลิก Add environment secrets ตั้งชื่อว่า DEFECTDOJO_API_KEY แล้วใส่ API Keys
 
 ```yaml
 name: CI/CD
