@@ -172,31 +172,35 @@ jobs:
             ls -la Nodegoat-Image-Report.json
 
       - name: Import sonar-report to DefectDojo
-        uses: ivanamat/defectdojo-import-scan@v1
-        with:
-          defectdojo_url: ${{ secrets.DEFECTDOJO_URL }}
-          token: ${{ secrets.DEFECTDOJO_API_KEY }}
-          engagement: 1 # ID ของ Engagement ที่ต้องการนำเข้าข้อมูล
-          scan_type: 'SonarQube Scan'
-          file: 'sonar-report.json'
+        run: |
+          curl -X POST \
+          "${DEFECTDOJO_URL}/api/v2/import-scan/" \
+          -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
+          -F "engagement=1" \ # ID ของ Engagement ที่ต้องการนำเข้าข้อมูล
+          -F "scan_date=$(date +%Y-%m-%d)" \
+          -F "scan_type=SonarQube Scan" \
+          -F "file=@sonar-report.json"
+        env:
+          DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+          DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
 
-      - name: Import Nodegoat-Code-Report to DefectDojo
-        uses: ivanamat/defectdojo-import-scan@v1
-        with:
-          defectdojo_url: ${{ secrets.DEFECTDOJO_URL }}
-          token: ${{ secrets.DEFECTDOJO_API_KEY }}
-          engagement: 2 # ID ของ Engagement ที่ต้องการนำเข้าข้อมูล
-          scan_type: 'Dependency Track Finding Packaging Format (FPF) Export'
-          file: 'Nodegoat-Code-Report.json'
+      # - name: Import Nodegoat-Code-Report to DefectDojo
+      #   uses: ivanamat/defectdojo-import-scan@v1
+      #   with:
+      #     defectdojo_url: ${{ secrets.DEFECTDOJO_URL }}
+      #     token: ${{ secrets.DEFECTDOJO_API_KEY }}
+      #     engagement: 2 # ID ของ Engagement ที่ต้องการนำเข้าข้อมูล
+      #     scan_type: 'Dependency Track Finding Packaging Format (FPF) Export'
+      #     file: 'Nodegoat-Code-Report.json'
 
-      - name: Import Nodegoat-Image-Report to DefectDojo
-        uses: ivanamat/defectdojo-import-scan@v1
-        with:
-          defectdojo_url: ${{ secrets.DEFECTDOJO_URL }}
-          token: ${{ secrets.DEFECTDOJO_API_KEY }}
-          engagement: 3 # ID ของ Engagement ที่ต้องการนำเข้าข้อมูล
-          scan_type: 'Dependency Track Finding Packaging Format (FPF) Export'
-          file: 'Nodegoat-Image-Report.json'
+      # - name: Import Nodegoat-Image-Report to DefectDojo
+      #   uses: ivanamat/defectdojo-import-scan@v1
+      #   with:
+      #     defectdojo_url: ${{ secrets.DEFECTDOJO_URL }}
+      #     token: ${{ secrets.DEFECTDOJO_API_KEY }}
+      #     engagement: 3 # ID ของ Engagement ที่ต้องการนำเข้าข้อมูล
+      #     scan_type: 'Dependency Track Finding Packaging Format (FPF) Export'
+      #     file: 'Nodegoat-Image-Report.json'
 
   deploy:
     needs: build
