@@ -176,7 +176,7 @@ jobs:
           curl -X POST \
           "${DEFECTDOJO_URL}/api/v2/import-scan/" \
           -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
-          -F "engagement=1" \ # ID ของ Engagement ที่ต้องการนำเข้าข้อมูล
+          -F "engagement=1" \
           -F "scan_date=$(date +%Y-%m-%d)" \
           -F "scan_type=SonarQube Scan" \
           -F "file=@sonar-report.json"
