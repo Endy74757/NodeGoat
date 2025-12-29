@@ -122,8 +122,8 @@ jobs:
     steps:
       - name: Export SonarQube Report
         run: |
-          curl -u ${SONAR_TOKEN}: \\
-          "${SONAR_HOST_URL}/api/issues/search?components=${SONAR_PROJECT_KEY}&ps=500" \\
+          curl -u "${SONAR_TOKEN}:" \
+          "${SONAR_HOST_URL}/api/issues/search?components=${SONAR_PROJECT_KEY}&ps=500" \
           -o sonar-report.json
         env:
           SONAR_PROJECT_KEY: 'Nodegoat'
