@@ -175,7 +175,7 @@ jobs:
         run: |
           curl -X POST \
           "${DEFECTDOJO_URL}/api/v2/import-scan/" \
-          -H "Host: ${DEFECTDOJO_URL}" \
+          -H "Host: defectdojo-django.defectdojo.svc.cluster.local" \
           -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
           -F "engagement=1" \
           -F "scan_date=$(date +%Y-%m-%d)" \
