@@ -120,17 +120,17 @@ jobs:
     runs-on: arc-scale-set
     environment: Dev
     steps:
-      - name: Export SonarQube Report
-        run: |
-          curl -u "${SONAR_TOKEN}:" \
-          "${SONAR_HOST_URL}/api/issues/search?components=${SONAR_PROJECT_KEY}&ps=500" \
-          -o sonar-report.json
+      # - name: Export SonarQube Report
+      #   run: |
+      #     curl -u "${SONAR_TOKEN}:" \
+      #     "${SONAR_HOST_URL}/api/issues/search?components=${SONAR_PROJECT_KEY}&ps=500" \
+      #     -o sonar-report.json
 
-          ls -la sonar-report.json
-        env:
-          SONAR_PROJECT_KEY: 'Nodegoat'
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      #     ls -la sonar-report.json
+      #   env:
+      #     SONAR_PROJECT_KEY: 'Nodegoat'
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       # Download Dependency Track Report
       - name: Export Dependency Track Report (Code Analysis Findings)
