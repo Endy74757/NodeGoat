@@ -136,7 +136,7 @@ jobs:
       - name: Export Dependency Track Report (Code Analysis Findings)
         env:
           DT_API_KEY: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
-          DT_URL: 'http://dependency-track-api-server.dependency-track.svc.cluster.local:8080/api'
+          DT_URL: 'http://dependency-track-api-server.dependency-track.svc.cluster.local:8080'
         run: |
           DT_PROJECT_UUID=$(curl -sS -X GET \
             --header "X-Api-Key: ${DT_API_KEY}" \
@@ -147,7 +147,7 @@ jobs:
 
           curl -sS -X GET \
             --header "X-Api-Key: ${DT_API_KEY}" \
-            "${DT_URL}/api/v1/finding/project/${DT_PROJECT_UUID}" \
+            "${DT_URL}/api/api/v1/finding/project/${DT_PROJECT_UUID}" \
             --output Nodegoat-Code-Report.json
 
           cat Nodegoat-Code-Report.json
