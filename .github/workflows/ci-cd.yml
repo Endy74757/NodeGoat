@@ -138,6 +138,7 @@ jobs:
           DT_API_KEY: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
           DT_URL: 'http://dependency-track-api-server.dependency-track.svc.cluster.local:8080'
         run: |
+          set -ex
           DT_PROJECT_UUID=$(curl -sS -X GET \
             --header "X-Api-Key: ${DT_API_KEY}" \
             "${DT_URL}/api/v1/project?name=Nodegoat-Code" \
