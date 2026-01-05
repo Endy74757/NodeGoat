@@ -116,7 +116,7 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
 
   Report:
-    needs: build
+    # needs: build
     runs-on: arc-scale-set
     environment: Dev
     steps:
