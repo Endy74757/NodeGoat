@@ -116,7 +116,7 @@ jobs:
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
 
   Report:
-    # needs: build
+    needs: build
     runs-on: arc-scale-set
     environment: Dev
     steps:
@@ -176,13 +176,15 @@ jobs:
       - name: Import sonar-report to DefectDojo
         run: |
           curl -X POST \
-          "${DEFECTDOJO_URL}/api/v2/import-scan/" \
+          "${DEFECTDOJO_URL}/api/v2/reimport-scan/" \
           -H "Host: defectdojo-django.defectdojo.svc.cluster.local" \
           -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
           -F "engagement=1" \
           -F "scan_date=$(date +%Y-%m-%d)" \
           -F "scan_type=SonarQube Scan" \
-          -F "file=@sonar-report.json"
+          -F "file=@sonar-report.json" \
+          -F "auto_create_context": True \
+          -F "do_not_reactivate": True
         env:
           DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
           DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
@@ -190,13 +192,15 @@ jobs:
       - name: Import Nodegoat-Code-Report to DefectDojo
         run: |
           curl -X POST \
-          "${DEFECTDOJO_URL}/api/v2/import-scan/" \
+          "${DEFECTDOJO_URL}/api/v2/reimport-scan/" \
           -H "Host: defectdojo-django.defectdojo.svc.cluster.local" \
           -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
           -F "engagement=2" \
           -F "scan_date=$(date +%Y-%m-%d)" \
           -F "scan_type=Dependency Track Finding Packaging Format (FPF) Export" \
-          -F "file=@Nodegoat-Code-Report.json"
+          -F "file=@Nodegoat-Code-Report.json" \
+          -F "auto_create_context": True \
+          -F "do_not_reactivate": False
         env:
           DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
           DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
