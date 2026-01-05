@@ -204,30 +204,66 @@ jobs:
           DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
           DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
 
+      # - name: Import Nodegoat-Code-Report to DefectDojo
+      #   run: |
+      #     curl -X POST \
+      #     "${DEFECTDOJO_URL}/api/v2/import-scan/" \
+      #     -H "Host: defectdojo-django.defectdojo.svc.cluster.local" \
+      #     -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
+      #     -F "engagement=2" \
+      #     -F "scan_date=$(date +%Y-%m-%d)" \
+      #     -F "scan_type=Dependency Track Finding Packaging Format (FPF) Export" \
+      #     -F "file=@Nodegoat-Code-Report.json"
+      #   env:
+      #     DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+      #     DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+
       - name: Import Nodegoat-Code-Report to DefectDojo
         run: |
           curl -X POST \
-          "${DEFECTDOJO_URL}/api/v2/import-scan/" \
+          "${DEFECTDOJO_URL}/api/v2/reimport-scan/" \
           -H "Host: defectdojo-django.defectdojo.svc.cluster.local" \
           -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
-          -F "engagement=2" \
+          -F "product_type_name=Research and Development" \
+          -F "product_name=NodeGoat" \
+          -F "engagement_name=Dependency Track Code" \
           -F "scan_date=$(date +%Y-%m-%d)" \
           -F "scan_type=Dependency Track Finding Packaging Format (FPF) Export" \
-          -F "file=@Nodegoat-Code-Report.json"
+          -F "file=@Nodegoat-Code-Report.json" \
+          -F "auto_create_context=true" \
+          -F "deduplication_on_engagement=true"
         env:
           DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
           DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
 
+      # - name: Import Nodegoat-Image-Report to DefectDojo
+      #   run: |
+      #     curl -X POST \
+      #     "${DEFECTDOJO_URL}/api/v2/import-scan/" \
+      #     -H "Host: defectdojo-django.defectdojo.svc.cluster.local" \
+      #     -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
+      #     -F "engagement=3" \
+      #     -F "scan_date=$(date +%Y-%m-%d)" \
+      #     -F "scan_type=Dependency Track Finding Packaging Format (FPF) Export" \
+      #     -F "file=@Nodegoat-Image-Report.json"
+      #   env:
+      #     DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
+      #     DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
+
       - name: Import Nodegoat-Image-Report to DefectDojo
         run: |
           curl -X POST \
-          "${DEFECTDOJO_URL}/api/v2/import-scan/" \
+          "${DEFECTDOJO_URL}/api/v2/reimport-scan/" \
           -H "Host: defectdojo-django.defectdojo.svc.cluster.local" \
           -H "Authorization: Token ${DEFECTDOJO_API_KEY}" \
-          -F "engagement=3" \
+          -F "product_type_name=Research and Development" \
+          -F "product_name=NodeGoat" \
+          -F "engagement_name=Dependency Track Image" \
           -F "scan_date=$(date +%Y-%m-%d)" \
           -F "scan_type=Dependency Track Finding Packaging Format (FPF) Export" \
-          -F "file=@Nodegoat-Image-Report.json"
+          -F "file=@Nodegoat-Image-Report.json" \
+          -F "auto_create_context=true" \
+          -F "deduplication_on_engagement=true"
         env:
           DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
           DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
