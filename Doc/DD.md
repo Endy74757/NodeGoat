@@ -1,6 +1,6 @@
-# ติดตั้ง Dependency-Track Server
+# ติดตั้ง DefectDojo Server
 
-คำแนะนำฉบับย่อสำหรับติดตั้ง Dependency-Track Server บน cluster ของคุณ พร้อมคำสั่งพร้อมใช้งาน (Helm)
+คำแนะนำฉบับย่อสำหรับติดตั้ง DefectDojo Server บน cluster ของคุณ พร้อมคำสั่งพร้อมใช้งาน (Helm)
 
 ---
 
@@ -10,36 +10,70 @@
 
 ---
 
-## 1. ติดตั้ง Dependency-Track Server ด้วย helm chart
+## 1. ติดตั้ง DefectDojo Server ด้วย helm chart
 
 ```bash
-helm udgrade --install dependency-track dependencytrack/dependency-track --version 0.40.0 -n dependency-track --create-namespace --set ingress.enabled=true
+DJANGO_INGRESS_ENABLED=true
+DJANGO_INGRESS_ACTIVATE_TLS=true
+helm upgrade --instal \
+  defectdojo \
+  defectdojo \
+  --set django.ingress.enabled=${DJANGO_INGRESS_ENABLED} \
+  --set django.ingress.activateTLS=${DJANGO_INGRESS_ACTIVATE_TLS} \
+  --set createSecret=true \
+  --set createValkeySecret=true \
+  --set createPostgresqlSecret=true \
+  -namespace defectdojo --create-namespace
 ```
 
-สามารถดูค่า helm value ต่างๆหรืออ่านเพิ่มเติมได้[ที่นี้](https://artifacthub.io/packages/helm/dependencytrack/dependency-track)
+ถ้าต้องการให้เรียก API ผ่าน Internal service ได้ให้ config value นี้:
+```yaml
+django:
+  # -- Autoscaling configuration for the Django deployment.
+  uwsgi:
+    extraEnv: 
+      - name: DD_ALLOWED_HOSTS
+        value: "defectdojo-django.defectdojo.svc.cluster.local"
+```
+
+สามารถดูค่า helm value ต่างๆหรืออ่านเพิ่มเติมได้[ที่นี้](https://artifacthub.io/packages/helm/defectdojo/defectdojo)
 
 ---
 
-## 2. สร้าง Project ใน Dependency-Track Server
+## 2. สร้าง Project ใน DefectDojo Server
 
-- Login Dependency-Track Server 
+- Login DefectDojo Server 
 ถ้าเข้าครั้งแรกจะ login ด้วย username/password ดังนี้  
+
+Username:
 ```
-Username: admin  
-Paswword: admin
+admin  
 ```
-- สร้าง Project 
+Password:
+```bash
+echo "DefectDojo admin password: $(kubectl \
+      get secret defectdojo \
+      --namespace=default \
+      --output jsonpath='{.data.DD_ADMIN_PASSWORD}' \
+      | base64 --decode)"
+```
+- สร้าง Product
 ```markdown
-คลิกไปที่ มุมซ้ายบน(☰) → Project → Create Project
-กรอก Project name ให้เรียบร้อย  
-เมื่อทำทุกอย่างครบให้คลิก Create
+คลิกไปที่ มุมซ้ายบน(☰) → Add Product
+กรอก Product name ให้เรียบร้อย  
+เมื่อทำทุกอย่างครบให้คลิก Summit
+```
+- สร้าง Engagements
+```markdown
+คลิกไปที่ Engagements → Add New CI/CD Engagement
+กรอก Engagement name ให้เรียบร้อย  
+เมื่อทำทุกอย่างครบให้คลิก Done
 ```
 
 ## 3. สร้าง API Keys เพื่อนำไปใช้ทำ CI
 ```markdown
-คลิกไปที่ มุมซ้ายบน(☰) → Administration → Access Management → Teams → Automation  
-หา API Keys คลิกที่รูปบวก  
-เพิ่ม PROJECT_CREATION_UPLOAD เพื่อให้สามารถสร้าง Project ผ่าน API Keys ได้โดยคลิกที่รูปบวก แล้วติ๊ก PROJECT_CREATION_UPLOAD   
+คลิกไปที่ มุมขวาบน → API v2 Key
+หา API Keys    
 Copy API Keys เก็บไว้ให้เรียบร้อย
 ```
 ---
@@ -48,7 +82,7 @@ Copy API Keys เก็บไว้ให้เรียบร้อย
 นำ API Keys ที่ได้ไปใส่ใน Secret ใน github
 - ไปที่ setting → Secrets and variables → Action 
 - สร้าง Environment secrets แล้วตั้งว่า Dev
-- คลิก Add environment secrets ตั้งชื่อว่า DEPENDENCYTRACK_APIKEY แล้วใส่ API Keys
+- คลิก Add environment secrets ตั้งชื่อว่า DEFECTDOJO_API_KEY แล้วใส่ API Keys
 
 ```yaml
 name: CI/CD
@@ -94,3 +128,7 @@ jobs:
           autoCreate: true
 ```
 อ่านเพิ่มเติมเกัยวกับ sbom-action ได้[ที่นี้](https://github.com/anchore/sbom-action) และ gh-upload-sbom ได้[ที่นี้](https://github.com/DependencyTrack/gh-upload-sbom)
+
+
+
+helm install defectdojo ./helm/defectdojo --set django.ingress.enabled=true --set django.ingress.activateTLS=false --set createSecret=true --set createValkeySecret=true --set createPostgresqlSecret=true

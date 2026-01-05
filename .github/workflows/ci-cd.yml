@@ -18,119 +18,120 @@ permissions:
   id-token: write
 
 jobs:
-  # build:
-  #   runs-on: arc-scale-set
-  #   environment: Dev
-  #   steps:
-  #     # เช็คเอาท์โค้ด
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+  build:
+    runs-on: arc-scale-set
+    environment: Dev
+    steps:
+      # เช็คเอาท์โค้ด
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
-  #     # รันการสแกน SonarQube
-  #     - name: SonarQube Scan
-  #       uses: SonarSource/sonarqube-scan-action@v6
-  #       with:
-  #         projectBaseDir: . # โฟลเดอร์โปรเจค
-  #         args: >
-  #           -Dsonar.projectKey=Nodegoat 
-  #           "-Dsonar.projectName=Nodegoat"
-  #           -Dsonar.projectVersion=1.0
-  #           -Dsonar.sources=.
-  #           -Dsonar.exclusions=**/node_modules/**,**/test/**,**/helm/**,**/*.yml,**/*.yaml,**/*.md,Dockerfile,,**/k8s/**
+      # รันการสแกน SonarQube
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        with:
+          projectBaseDir: . # โฟลเดอร์โปรเจค
+          args: >
+            -Dsonar.projectKey=Nodegoat 
+            "-Dsonar.projectName=Nodegoat"
+            -Dsonar.projectVersion=1.0
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/node_modules/**,**/test/**,**/helm/**,**/*.yml,**/*.yaml,**/*.md,Dockerfile,,**/k8s/**
 
-  #       env:
-  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #         SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
-  #     # รัน Syft เพื่อสร้าง SBOM
-  #     - name: Generate SBOM using Syft
-  #       uses: anchore/sbom-action@v0
-  #       with:
-  #         path: . # scan โฟลเดอร์ปัจจุบัน
-  #         format: cyclonedx-json # รูปแบบไฟล์ (spdx-json, cyclonedx-json, syft-json)
-  #         output-file: nodegoat-code-sbom.json
+      # รัน Syft เพื่อสร้าง SBOM
+      - name: Generate SBOM using Syft
+        uses: anchore/sbom-action@v0
+        with:
+          path: . # scan โฟลเดอร์ปัจจุบัน
+          format: cyclonedx-json # รูปแบบไฟล์ (spdx-json, cyclonedx-json, syft-json)
+          output-file: nodegoat-code-sbom.json
 
-  #     # อัพโหลด SBOM ขึ้น Dependency Track
-  #     - name: Dependeency Track
-  #       uses: DependencyTrack/gh-upload-sbom@v3
-  #       with:
-  #         protocol: 'http'
-  #         serverHostname: 'dependency-track-api-server.dependency-track.svc.cluster.local'
-  #         port: "8080"
-  #         apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
-  #         projectName: 'Nodegoat-Code'
-  #         projectVersion: 'master'
-  #         bomFilename: "nodegoat-code-sbom.json"
-  #         autoCreate: true
+      # อัพโหลด SBOM ขึ้น Dependency Track
+      - name: Dependeency Track
+        uses: DependencyTrack/gh-upload-sbom@v3
+        with:
+          protocol: 'http'
+          serverHostname: 'dependency-track-api-server.dependency-track.svc.cluster.local'
+          port: "8080"
+          apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
+          projectName: 'Nodegoat-Code'
+          projectVersion: 'master'
+          bomFilename: "nodegoat-code-sbom.json"
+          autoCreate: true
 
-  #     # ติดตั้ง Docker Buildx
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v3
+      # ติดตั้ง Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-  #     # login to Docker Hub
-  #     - name: Login to container registry
-  #       uses: docker/login-action@v2
-  #       with:
-  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
-  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
+      # login to Docker Hub
+      - name: Login to container registry
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-  #     # Build และ Load เข้า Docker Local (ยังไม่ Push)
-  #     - name: Build Docker image
-  #       uses: docker/build-push-action@v4
-  #       with:
-  #         context: .
-  #         file: ./Dockerfile
-  #         load: true       # ⚠️ สำคัญ: ดึง Image ออกมาเพื่อให้ Step ถัดไปมองเห็น
-  #         push: false      # ยังไม่ Push
-  #         tags: |
-  #           ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
-  #           ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
-  #         cache-from: type=gha
-  #         cache-to: type=gha,mode=max
+      # Build และ Load เข้า Docker Local (ยังไม่ Push)
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true       # ⚠️ สำคัญ: ดึง Image ออกมาเพื่อให้ Step ถัดไปมองเห็น
+          push: false      # ยังไม่ Push
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-  #     # สร้าง SBOM จาก Image ที่เพิ่ง Build
-  #     - name: Generate SBOM
-  #       uses: anchore/sbom-action@v0
-  #       with:
-  #         image: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
-  #         format: cyclonedx-json 
-  #         output-file: nodegoat-image-sbom.json
+      # สร้าง SBOM จาก Image ที่เพิ่ง Build
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
+          format: cyclonedx-json 
+          output-file: nodegoat-image-sbom.json
 
-  #     # อัพโหลด SBOM ขึ้น Dependency Track
-  #     - name: Dependeency Track
-  #       uses: DependencyTrack/gh-upload-sbom@v3
-  #       with:
-  #         protocol: 'http'
-  #         serverHostname: 'dependency-track-api-server.dependency-track.svc.cluster.local'
-  #         port: "8080"
-  #         apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
-  #         projectName: 'Nodegoat-Image'
-  #         projectVersion: 'master'
-  #         bomFilename: "nodegoat-image-sbom.json"
-  #         autoCreate: true
+      # อัพโหลด SBOM ขึ้น Dependency Track
+      - name: Dependeency Track
+        uses: DependencyTrack/gh-upload-sbom@v3
+        with:
+          protocol: 'http'
+          serverHostname: 'dependency-track-api-server.dependency-track.svc.cluster.local'
+          port: "8080"
+          apiKey: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
+          projectName: 'Nodegoat-Image'
+          projectVersion: 'master'
+          bomFilename: "nodegoat-image-sbom.json"
+          autoCreate: true
 
-  #     # Push Image ขึ้น Docker Hub
-  #     - name: Push Docker image
-  #       run: |
-  #         docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
-  #         docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
+      # Push Image ขึ้น Docker Hub
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/nodegoat:${{ github.sha }}
 
   Report:
     # needs: build
     runs-on: arc-scale-set
     environment: Dev
     steps:
-      # - name: Export SonarQube Report
-      #   run: |
-      #     curl -u "${SONAR_TOKEN}:" \
-      #     "${SONAR_HOST_URL}/api/issues/search?components=${SONAR_PROJECT_KEY}&ps=500" \
-      #     -o sonar-report.json
+      # Download SonarQube Report
+      - name: Export SonarQube Report
+        run: |
+          curl -u "${SONAR_TOKEN}:" \
+          "${SONAR_HOST_URL}/api/issues/search?components=${SONAR_PROJECT_KEY}&ps=500" \
+          -o sonar-report.json
 
-      #     ls -la sonar-report.json
-      #   env:
-      #     SONAR_PROJECT_KEY: 'Nodegoat'
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          ls -la sonar-report.json
+        env:
+          SONAR_PROJECT_KEY: 'Nodegoat'
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       # Download Dependency Track Report
       - name: Export Dependency Track Report (Code Analysis Findings)
@@ -148,10 +149,9 @@ jobs:
 
           curl -sS -X GET \
             --header "X-Api-Key: ${DT_API_KEY}" \
-            "${DT_URL}/api/v1/finding/project/${DT_PROJECT_UUID}" \
+            "${DT_URL}/api/v1/finding/project/${DT_PROJECT_UUID}/export" \
             --output Nodegoat-Code-Report.json
-          ls -la
-          cat Nodegoat-Code-Report.json
+          ls -la Nodegoat-Code-Report.json
 
       - name: Export Dependency Track Report (Image Analysis Findings)
         env:
@@ -171,8 +171,7 @@ jobs:
             "${DT_URL}/api/v1/finding/project/${DT_PROJECT_UUID}/export" \
             --output Nodegoat-Image-Report.json
 
-            ls -la
-            cat Nodegoat-Image-Report.json
+            ls -la Nodegoat-Image-Report.json
 
       - name: Import sonar-report to DefectDojo
         run: |
@@ -216,56 +215,56 @@ jobs:
           DEFECTDOJO_URL: ${{ secrets.DEFECTDOJO_URL }}
           DEFECTDOJO_API_KEY: ${{ secrets.DEFECTDOJO_API_KEY }}
 
-  # deploy:
-  #   needs: build
-  #   runs-on: arc-scale-set
-  #   environment: Dev
-  #   steps:
-  #     # เช็คเอาท์โค้ด
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v4
+  deploy:
+    needs: build
+    runs-on: arc-scale-set
+    environment: Dev
+    steps:
+      # เช็คเอาท์โค้ด
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-  #     # ติดตั้ง kubectl
-  #     - name: Install kubectl
-  #       uses: azure/setup-kubectl@v3
-  #       with:
-  #         version: 'latest'
+      # ติดตั้ง kubectl
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
 
-  #     # ติดตั้ง helm
-  #     - name: Install Helm
-  #       uses: azure/setup-helm@v3
-  #       with:
-  #         version: 'latest'
+      # ติดตั้ง helm
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
 
-  #     # ตั้งค่า kubeconfig
-  #     - name: Configure kubeconfig
-  #       env:
-  #         KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-  #       run: |
-  #         mkdir -p $HOME/.kube
-  #         echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
-  #         chmod 600 $HOME/.kube/config
+      # ตั้งค่า kubeconfig
+      - name: Configure kubeconfig
+        env:
+          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+        run: |
+          mkdir -p $HOME/.kube
+          echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
 
-  #     # ตรวจสอบสิทธิ์ของ Runner
-  #     - name: Detect runner ServiceAccount & verify permissions
-  #       run: |
-  #         echo "Runner pod: $(hostname)"
-  #         echo "ServiceAccount:"
-  #         kubectl get pod $(hostname) -o jsonpath='{.spec.serviceAccountName}{"\n"}' || true
-  #         echo "Current context:"
-  #         kubectl config view --minify || true
-  #         kubectl version --short || true
-  #         echo "Can we create deployments in namespace nodegoat?"
-  #         kubectl auth can-i create deployments --namespace=nodegoat || true
-  #         helm version || true
+      # ตรวจสอบสิทธิ์ของ Runner
+      - name: Detect runner ServiceAccount & verify permissions
+        run: |
+          echo "Runner pod: $(hostname)"
+          echo "ServiceAccount:"
+          kubectl get pod $(hostname) -o jsonpath='{.spec.serviceAccountName}{"\n"}' || true
+          echo "Current context:"
+          kubectl config view --minify || true
+          kubectl version --short || true
+          echo "Can we create deployments in namespace nodegoat?"
+          kubectl auth can-i create deployments --namespace=nodegoat || true
+          helm version || true
 
-  #     # Deploy ด้วย Helm
-  #     - name: Deploy Helm chart
-  #       env:
-  #         IMAGE_REPO: ${{ vars.DOCKERHUB_USERNAME }}/nodegoat
-  #         IMAGE_TAG: latest # ${{ github.sha }}
-  #       run: |
-  #         helm upgrade --install nodegoat ./helm \
-  #           --namespace nodegoat --create-namespace \
-  #           --set webapp.nodegoat.image.repository=${IMAGE_REPO} \
-  #           --set webapp.nodegoat.image.tag=${IMAGE_TAG} 
+      # Deploy ด้วย Helm
+      - name: Deploy Helm chart
+        env:
+          IMAGE_REPO: ${{ vars.DOCKERHUB_USERNAME }}/nodegoat
+          IMAGE_TAG: latest # ${{ github.sha }}
+        run: |
+          helm upgrade --install nodegoat ./helm \
+            --namespace nodegoat --create-namespace \
+            --set webapp.nodegoat.image.repository=${IMAGE_REPO} \
+            --set webapp.nodegoat.image.tag=${IMAGE_TAG} 
